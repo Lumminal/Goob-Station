@@ -4,7 +4,8 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.Heretic;
 
-public sealed partial class HereticCombatMarkSystem : EntitySystem
+public sealed partial class
+    HereticCombatMarkSystem : EntitySystem
 {
     public override void Initialize()
     {

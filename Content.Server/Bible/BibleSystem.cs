@@ -3,6 +3,7 @@ using Content.Server.Atmos.EntitySystems;
 using Content.Server.Bible.Components;
 using Content.Server.Ghost.Roles.Events;
 using Content.Server.Popups;
+using Content.Server.Stunnable;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Actions;
 using Content.Shared.Bible;
@@ -16,11 +17,16 @@ using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Timing;
 using Content.Shared._Goobstation.Religion;
+using Content.Shared.Heretic;
+using Content.Shared.Item;
+using Content.Shared.Standing;
+using Content.Shared.Stunnable;
 using Content.Shared.Verbs;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Player;
 using Robust.Shared.Random;
+
 
 namespace Content.Server.Bible
 {
@@ -37,12 +43,14 @@ namespace Content.Server.Bible
         [Dependency] private readonly UseDelaySystem _delay = default!;
         [Dependency] private readonly SharedTransformSystem _transform = default!;
         [Dependency] private readonly FlammableSystem _flammableSystem = default!;
+        [Dependency] private readonly SharedStunSystem _stun = default!; // goob
 
         public override void Initialize()
         {
             base.Initialize();
 
             SubscribeLocalEvent<BibleComponent, AfterInteractEvent>(OnAfterInteract);
+            SubscribeLocalEvent<BibleComponent, GettingPickedUpAttemptEvent>(OnAttemptPickup);
             SubscribeLocalEvent<SummonableComponent, GetVerbsEvent<AlternativeVerb>>(AddSummonVerb);
             SubscribeLocalEvent<SummonableComponent, GetItemActionsEvent>(GetSummonAction);
             SubscribeLocalEvent<SummonableComponent, SummonActionEvent>(OnSummon);
@@ -93,6 +101,15 @@ namespace Content.Server.Bible
                 summonableComp.Accumulator = 0;
                 _remQueue.Enqueue(uid);
             }
+        }
+
+        private void OnAttemptPickup(EntityUid uid, BibleComponent component, GettingPickedUpAttemptEvent args)
+        {
+            // TODO: Get blocker system to work
+            // TODO: if user is heretic then do this below
+
+            _popupSystem.PopupEntity(Loc.GetString("heretic-bible-pickup"), args.User, args.User);
+            _stun.TryParalyze(args.User, TimeSpan.FromSeconds(10f), true);
         }
 
         private void OnAfterInteract(EntityUid uid, BibleComponent component, AfterInteractEvent args)
