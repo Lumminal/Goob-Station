@@ -1,0 +1,26 @@
+- type: entity
+  parent: BaseItem
+  id: CameraInstant
+  name: instant camera
+  description: An instant camera.
+  components:
+  - type: Sprite
+    sprite: _Goobstation/Objects/Devices/instant-camera.rsi
+    layers:
+      - state: instant-cam
+        shader: unshaded
+  - type: PhotoCamera
+    maxCharges: 30
+
+- type: entity
+  parent: BaseItem
+  id: Photo
+  name: photo
+  description: A photo.
+  components:
+  - type: Sprite
+    sprite: _Goobstation/Objects/Devices/instant-camera.rsi
+    layers:
+      - state: photo
+        shader: unshaded
+
