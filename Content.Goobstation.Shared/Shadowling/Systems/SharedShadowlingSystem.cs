@@ -1,6 +1,7 @@
 using Content.Goobstation.Shared.LightDetection.Components;
 using Content.Goobstation.Shared.LightDetection.Systems;
 using Content.Goobstation.Shared.Shadowling.Components;
+using Content.Shared._Shitmed.Weapons.Ranged.Events;
 using Content.Shared.Actions;
 using Content.Shared.Damage;
 using Content.Shared.DoAfter;
@@ -10,6 +11,7 @@ using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Projectiles;
 using Content.Shared.Stunnable;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
@@ -60,6 +62,10 @@ public abstract class SharedShadowlingSystem : EntitySystem
 
     private void OnDamageModify(EntityUid uid, ShadowlingComponent component, DamageModifyEvent args)
     {
+        if (args.Origin is not {} origin
+            || !HasComp<ProjectileComponent>(origin))
+            return;
+
         foreach (var (key,_) in args.Damage.DamageDict)
         {
             if (key == "Heat")
