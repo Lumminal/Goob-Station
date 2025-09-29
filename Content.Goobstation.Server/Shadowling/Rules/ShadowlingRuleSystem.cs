@@ -107,7 +107,6 @@ public sealed class ShadowlingRuleSystem : GameRuleSystem<ShadowlingRuleComponen
         _antag.SendBriefing(target, briefing, Color.MediumPurple, _briefingSound);
 
         EnsureComp<ZombieImmuneComponent>(target);
-        EnsureComp<ShadowlingComponent>(target);
         return true;
     }
 

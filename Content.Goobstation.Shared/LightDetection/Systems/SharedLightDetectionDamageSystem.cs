@@ -27,8 +27,11 @@ public abstract class SharedLightDetectionDamageSystem : EntitySystem
         _alerts.ClearAlert(uid, component.AlertProto);
     }
 
-    public void AddResistance(Entity<LightDetectionDamageComponent> ent, float amount)
+    public void AddResistance(Entity<LightDetectionDamageComponent?> ent, float amount)
     {
+        if (!Resolve(ent.Owner, ref ent.Comp))
+            return;
+
         ent.Comp.ResistanceModifier += amount;
         DirtyField(ent.Owner, ent.Comp, nameof(LightDetectionDamageComponent.ResistanceModifier));
     }

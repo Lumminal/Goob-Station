@@ -18,6 +18,9 @@
       lateJoinAdditional: true
       mindRoles:
       - MindRoleShadowling
+      components:
+      - type: Shadowling
+        lightResistanceModifier: 0.12
   - type: AntagObjectives
     objectives:
     - ShadowlingAscendObjective

@@ -10,7 +10,6 @@
     revertOnCrit: false
     componentsToTransfer:
     - component: Shadowling
-      mirror: true
 
 - type: polymorph
   id: ShadowlingAscendantPolymorph

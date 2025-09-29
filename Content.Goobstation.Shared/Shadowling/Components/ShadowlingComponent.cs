@@ -88,7 +88,7 @@ public sealed partial class ShadowlingComponent : Component
     /// The overall resistance exists in the system LightDetectionDamageModifier, which (for this case) handles taking damage while standing on light.
     /// Gets removed once Nox Imperii ability is used.
     /// </summary>
-    [DataField]
+    [DataField, AutoNetworkedField]
     public float LightResistanceModifier = 0.12f;
 
     /// <summary>
