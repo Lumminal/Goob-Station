@@ -5,16 +5,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Shared.Chemistry.Reagent;
-using Content.Server.Body.Systems;
-using Content.Shared.EntityEffects;
 using Content.Goobstation.Maths.FixedPoint;
 using Content.Shared.Body.Components;
+using Content.Shared.Body.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 
-namespace Content.Server.EntityEffects.Effects;
+namespace Content.Shared.EntityEffects.Effects;
 
 public sealed partial class AddReagentToBlood : EntityEffect
 {
@@ -30,7 +29,7 @@ public sealed partial class AddReagentToBlood : EntityEffect
     {
         if (args.EntityManager.TryGetComponent<BloodstreamComponent>(args.TargetEntity, out var blood))
         {
-            var sys = args.EntityManager.System<BloodstreamSystem>();
+            var sys = args.EntityManager.System<SharedBloodstreamSystem>();
             if (args is EntityEffectReagentArgs reagentArgs)
             {
                 if (Reagent is null) return;

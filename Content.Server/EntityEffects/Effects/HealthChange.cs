@@ -55,12 +55,10 @@
 
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
-using Content.Shared.EntityEffects;
 using Content.Goobstation.Maths.FixedPoint;
 using Content.Shared.Localizations;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
-using System.Linq;
 using System.Text.Json.Serialization;
 
 // Shitmed Changes
@@ -68,8 +66,9 @@ using Content.Shared._Shitmed.EntityEffects.Effects;
 using Content.Shared._Shitmed.Targeting;
 using Content.Server.Temperature.Components;
 using Content.Shared._Shitmed.Damage;
+using Content.Shared.EntityEffects;
 
-namespace Content.Shared.EntityEffects.Effects
+namespace Content.Server.EntityEffects.Effects
 {
     /// <summary>
     /// Default metabolism used for medicine reagents.
@@ -184,45 +183,48 @@ namespace Content.Shared.EntityEffects.Effects
             {
                 scale = ScaleByQuantity ? reagentArgs.Quantity * reagentArgs.Scale : reagentArgs.Scale;
 
-            if (ScaleByTemperature.HasValue)
-            {
-                if (!args.EntityManager.TryGetComponent<TemperatureComponent>(args.TargetEntity, out var temp))
-                    scale = FixedPoint2.Zero;
-                else
-                    scale *= ScaleByTemperature.Value.GetEfficiencyMultiplier(temp.CurrentTemperature, scale, false);
-            }
-
-            var universalReagentDamageModifier =
-                args.EntityManager.System<DamageableSystem>().UniversalReagentDamageModifier;
-            var universalReagentHealModifier =
-                args.EntityManager.System<DamageableSystem>().UniversalReagentHealModifier;
-
-            if (universalReagentDamageModifier != 1 || universalReagentHealModifier != 1)
-            {
-                foreach (var (type, val) in damageSpec.DamageDict)
+                if (ScaleByTemperature.HasValue)
                 {
-                    if (val < 0f)
-                    {
-                        damageSpec.DamageDict[type] = val * universalReagentHealModifier;
-                    }
+                    if (!args.EntityManager.TryGetComponent<TemperatureComponent>(args.TargetEntity, out var temp))
+                        scale = FixedPoint2.Zero;
+                    else
+                        scale *= ScaleByTemperature.Value.GetEfficiencyMultiplier(temp.CurrentTemperature,
+                            scale,
+                            false);
+                }
 
-                    if (val > 0f)
+                var universalReagentDamageModifier =
+                    args.EntityManager.System<DamageableSystem>().UniversalReagentDamageModifier;
+                var universalReagentHealModifier =
+                    args.EntityManager.System<DamageableSystem>().UniversalReagentHealModifier;
+
+                if (universalReagentDamageModifier != 1 || universalReagentHealModifier != 1)
+                {
+                    foreach (var (type, val) in damageSpec.DamageDict)
                     {
-                        damageSpec.DamageDict[type] = val * universalReagentDamageModifier;
+                        if (val < 0f)
+                        {
+                            damageSpec.DamageDict[type] = val * universalReagentHealModifier;
+                        }
+
+                        if (val > 0f)
+                        {
+                            damageSpec.DamageDict[type] = val * universalReagentDamageModifier;
+                        }
                     }
                 }
+
+                args.EntityManager.System<DamageableSystem>()
+                    .TryChangeDamage(
+                        args.TargetEntity,
+                        damageSpec * scale,
+                        IgnoreResistances,
+                        interruptsDoAfters: false,
+                        targetPart: UseTargeting ? TargetPart : null,
+                        ignoreBlockers: IgnoreBlockers,
+                        splitDamage: SplitDamage); // Shitmed Change
+
             }
-
-            args.EntityManager.System<DamageableSystem>()
-                .TryChangeDamage(
-                    args.TargetEntity,
-                    damageSpec * scale,
-                    IgnoreResistances,
-                    interruptsDoAfters: false,
-                    targetPart: UseTargeting ? TargetPart : null,
-                    ignoreBlockers: IgnoreBlockers,
-                    splitDamage: SplitDamage); // Shitmed Change
-
         }
     }
 }

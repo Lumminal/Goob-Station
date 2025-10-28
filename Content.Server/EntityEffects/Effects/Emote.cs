@@ -19,17 +19,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using Content.Server.Chat.Systems;
 using Content.Shared.Chat; // Einstein Engines - Language
 using Content.Shared.Chat.Prototypes;
+using Content.Shared.EntityEffects;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
 
-namespace Content.Shared.EntityEffects.Effects;
+namespace Content.Server.EntityEffects.Effects;
 
 /// <summary>
 ///     Tries to force someone to emote (scream, laugh, etc). Still respects whitelists/blacklists and other limits unless specially forced.
 /// </summary>
-public sealed partial class Emote : EventEntityEffect<Emote>
+public sealed partial class Emote : EntityEffect
 {
     /// <summary>
     ///     The emote the entity will preform.
@@ -65,7 +67,7 @@ public sealed partial class Emote : EventEntityEffect<Emote>
 
     public override void Effect(EntityEffectBaseArgs args)
     {
-        var chatSys = args.EntityManager.System<SharedChatSystem>();
+        var chatSys = args.EntityManager.System<ChatSystem>();
         if (ShowInChat)
             chatSys.TryEmoteWithChat(args.TargetEntity, EmoteId, ChatTransmitRange.GhostRangeLimit, forceEmote: Force);
         else

@@ -9,6 +9,7 @@ using Content.Server.Botany.Systems;
 using Content.Server.Botany;
 using Content.Server.Chat.Systems;
 using Content.Server.Emp;
+using Content.Server.EntityEffects.Effects;
 using Content.Server.Explosion.EntitySystems;
 using Content.Server.Flash;
 using Content.Server.Fluids.EntitySystems;
@@ -24,6 +25,8 @@ using Content.Server.Traits.Assorted;
 using Content.Server.Zombies;
 using Content.Shared.Atmos;
 using Content.Shared.Audio;
+using Content.Shared.Body.Components;
+using Content.Shared.Chat;
 using Content.Shared.Coordinates.Helpers;
 using Content.Shared.EntityEffects.EffectConditions;
 using Content.Shared.EntityEffects.Effects.PlantMetabolism;
@@ -74,6 +77,7 @@ public sealed class EntityEffectSystem : EntitySystem
     [Dependency] private readonly TemperatureSystem _temperature = default!;
     [Dependency] private readonly SharedTransformSystem _xform = default!;
     [Dependency] private readonly VomitSystem _vomit = default!;
+    [Dependency] private readonly TurfSystem _turf = default!;
 
     public override void Initialize()
     {
@@ -98,12 +102,12 @@ public sealed class EntityEffectSystem : EntitySystem
         SubscribeLocalEvent<ExecuteEntityEffectEvent<PlantPhalanximine>>(OnExecutePlantPhalanximine);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<PlantRestoreSeeds>>(OnExecutePlantRestoreSeeds);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<AdjustTemperature>>(OnExecuteAdjustTemperature);
-        SubscribeLocalEvent<ExecuteEntityEffectEvent<AreaReactionEffect>>(OnExecuteAreaReactionEffect);
+        SubscribeLocalEvent<ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.AreaReactionEffect>>(OnExecuteAreaReactionEffect);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<CauseZombieInfection>>(OnExecuteCauseZombieInfection);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<ChemCleanBloodstream>>(OnExecuteChemCleanBloodstream);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<ChemVomit>>(OnExecuteChemVomit);
-        SubscribeLocalEvent<ExecuteEntityEffectEvent<CreateEntityReactionEffect>>(OnExecuteCreateEntityReactionEffect);
-        SubscribeLocalEvent<ExecuteEntityEffectEvent<CreateGas>>(OnExecuteCreateGas);
+        SubscribeLocalEvent<ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.CreateEntityReactionEffect>>(OnExecuteCreateEntityReactionEffect);
+        SubscribeLocalEvent<ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.CreateGas>>(OnExecuteCreateGas);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<CureZombieInfection>>(OnExecuteCureZombieInfection);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<Emote>>(OnExecuteEmote);
         SubscribeLocalEvent<ExecuteEntityEffectEvent<EmpReactionEffect>>(OnExecuteEmpReactionEffect);
@@ -509,7 +513,7 @@ public sealed class EntityEffectSystem : EntitySystem
         }
     }
 
-    private void OnExecuteAreaReactionEffect(ref ExecuteEntityEffectEvent<AreaReactionEffect> args)
+    private void OnExecuteAreaReactionEffect(ref ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.AreaReactionEffect> args)
     {
         if (args.Args is EntityEffectReagentArgs reagentArgs)
         {
@@ -527,7 +531,7 @@ public sealed class EntityEffectSystem : EntitySystem
                 return;
             }
 
-            if (_spreader.RequiresFloorToSpread(args.Effect.PrototypeId) && tileRef.Tile.IsSpace())
+            if (_spreader.RequiresFloorToSpread(args.Effect.PrototypeId) && _turf.IsSpace(tileRef))
                 return;
 
             var coords = _map.MapToGrid(gridUid, mapCoords);
@@ -575,7 +579,7 @@ public sealed class EntityEffectSystem : EntitySystem
         _vomit.Vomit(args.Args.TargetEntity, args.Effect.ThirstAmount, args.Effect.HungerAmount);
     }
 
-    private void OnExecuteCreateEntityReactionEffect(ref ExecuteEntityEffectEvent<CreateEntityReactionEffect> args)
+    private void OnExecuteCreateEntityReactionEffect(ref ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.CreateEntityReactionEffect> args)
     {
         var transform = Comp<TransformComponent>(args.Args.TargetEntity);
         var quantity = (int)args.Effect.Number;
@@ -597,7 +601,7 @@ public sealed class EntityEffectSystem : EntitySystem
         }
     }
 
-    private void OnExecuteCreateGas(ref ExecuteEntityEffectEvent<CreateGas> args)
+    private void OnExecuteCreateGas(ref ExecuteEntityEffectEvent<Shared.EntityEffects.Effects.CreateGas> args)
     {
         var tileMix = _atmosphere.GetContainingMixture(args.Args.TargetEntity, false, true);
 
@@ -630,9 +634,6 @@ public sealed class EntityEffectSystem : EntitySystem
 
     private void OnExecuteEmote(ref ExecuteEntityEffectEvent<Emote> args)
     {
-        if (args.Effect.EmoteId == null)
-            return;
-
         if (args.Effect.ShowInChat)
             _chat.TryEmoteWithChat(args.Args.TargetEntity, args.Effect.EmoteId, ChatTransmitRange.GhostRangeLimit, forceEmote: args.Effect.Force);
         else
@@ -708,7 +709,7 @@ public sealed class EntityEffectSystem : EntitySystem
             args.Args.TargetEntity,
             null,
             range,
-            args.Effect.Duration * 1000,
+            TimeSpan.FromSeconds(args.Effect.Duration * 1000),
             slowTo: args.Effect.SlowTo,
             sound: args.Effect.Sound);
 
@@ -780,7 +781,7 @@ public sealed class EntityEffectSystem : EntitySystem
                 amt *= reagentArgs.Scale.Float();
             }
 
-            _bloodstream.TryModifyBleedAmount(args.Args.TargetEntity, amt, blood);
+            _bloodstream.TryModifyBleedAmount((args.Args.TargetEntity, blood), amt);
         }
     }
 
@@ -796,7 +797,7 @@ public sealed class EntityEffectSystem : EntitySystem
                 amt *= reagentArgs.Scale;
             }
 
-            _bloodstream.TryModifyBloodLevel(args.Args.TargetEntity, amt, blood);
+            _bloodstream.TryModifyBloodLevel((args.Args.TargetEntity, blood), amt);
         }
     }
 

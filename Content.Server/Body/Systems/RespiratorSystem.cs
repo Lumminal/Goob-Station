@@ -103,6 +103,7 @@ using Robust.Shared.Timing;
 using Content.Shared.Movement.Pulling.Components; // Goobstation
 using Content.Shared.Movement.Pulling.Systems; // Goobstation
 using Content.Goobstation.Shared.Body.Components;
+using Content.Server.EntityEffects.Effects;
 using Content.Shared._DV.CosmicCult.Components; // DeltaV
 
 // Shitmed Change

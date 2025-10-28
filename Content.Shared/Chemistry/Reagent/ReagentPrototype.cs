@@ -274,7 +274,7 @@ namespace Content.Shared.Chemistry.Reagent
         [DataField]
         public bool? WorksOnUnconscious;
 
-        [DataField(serverOnly: true)]
+        [DataField]
         public FrozenDictionary<ProtoId<MetabolismGroupPrototype>, ReagentEffectsEntry>? Metabolisms;
 
         [DataField]
