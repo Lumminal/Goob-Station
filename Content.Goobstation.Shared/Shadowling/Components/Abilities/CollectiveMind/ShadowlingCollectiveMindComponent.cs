@@ -22,12 +22,6 @@ public sealed partial class ShadowlingCollectiveMindComponent : Component
     public List<ProtoId<ShadowlingAbilityUnlockPrototype>> UnlockedAbilities = new();
 
     /// <summary>
-    /// The amount of thralls that the Shadowling has, in order to check what abilities to give.
-    /// </summary>
-    [DataField, AutoNetworkedField]
-    public int AmountOfThralls;
-
-    /// <summary>
     /// The required thralls for ascension.
     /// Used to inform the Shadowling how many thralls they need to unlock the final ability.
     /// </summary>

@@ -11,6 +11,11 @@
   - type: ShadowlingNullCharge
     nullChargeToComplete: 4
 
+- type: shadowlingAbilityUnlock
+  id: NightmareArmblade
+  count: 6
+  addComponents:
+  - type: LightEaterUser
 
 - type: shadowlingAbilityUnlock
   id: BlackRecuperation
@@ -19,18 +24,26 @@
   - type: ShadowlingBlackRecuperation
 
 - type: shadowlingAbilityUnlock
-  id: BlindnessSmoke
-  count: 10
-  addComponents:
-  - type: ShadowlingBlindnessSmoke
-
-- type: shadowlingAbilityUnlock
   id: EmpoweredEnthrall
-  count: 12
+  count: 10
   addComponents:
   - type: ShadowlingEmpoweredEnthrall
   removeComponents:
   - type: ShadowlingEnthrall
+
+- type: shadowlingAbilityUnlock
+  id: BlindnessSmoke
+  count: 12
+  addComponents:
+  - type: ShadowlingBlindnessSmoke
+
+- type: shadowlingAbilityUnlock
+  id: NightmareReflect
+  count: 13
+  addComponents:
+  - type: Nightmare
+    knockdownOnJaunt: false
+  - type: Reflect
 
 - type: shadowlingAbilityUnlock
   id: NoxImperii

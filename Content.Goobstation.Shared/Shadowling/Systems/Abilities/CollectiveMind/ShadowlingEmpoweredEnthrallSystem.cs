@@ -73,7 +73,7 @@ public sealed class ShadowlingEmpoweredEnthrallSystem : EntitySystem
             || args.Cancelled)
             return;
 
-        _shadowling.DoEnthrall(uid, component.EnthrallComponents, args);
+        _shadowling.DoEnthrall(uid, component.EnthrallComponents, args, component.PlaySound);
         args.Handled = true;
     }
 }

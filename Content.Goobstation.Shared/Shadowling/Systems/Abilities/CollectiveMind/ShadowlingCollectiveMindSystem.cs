@@ -50,15 +50,9 @@ public sealed class ShadowlingCollectiveMindSystem : EntitySystem
 
         if (comp.UnlockedAbilities.Count >= comp.AvailableAbilities.Count)
         {
-            _popups.PopupPredicted(Loc.GetString("shadowling-collective-mind-ascend"), uid, uid, PopupType.Medium);
+            _popups.PopupClient(Loc.GetString("shadowling-collective-mind-ascend"), uid, uid, PopupType.Medium);
             return;
         }
-
-        comp.AmountOfThralls = sling.Thralls.Count;
-        var thrallsRemaining = comp.ThrallsRequiredForAscension - comp.AmountOfThralls; // aka Thralls required for ascension
-
-        if (thrallsRemaining < 0)
-            thrallsRemaining = 0;
 
         var abiltiesAddedCount = 0;
 
@@ -70,7 +64,7 @@ public sealed class ShadowlingCollectiveMindSystem : EntitySystem
 
             var proto = _protoMan.Index(unlock);
 
-            if (comp.AmountOfThralls < proto.UnlockAtThralls)
+            if (sling.Thralls.Count < proto.UnlockAtThralls)
                 continue;
 
             if (proto.AddComponents != null)
@@ -82,9 +76,10 @@ public sealed class ShadowlingCollectiveMindSystem : EntitySystem
             comp.UnlockedAbilities.Add(unlock);
         }
 
+        var thrallsRemaining = Math.Max(0, comp.ThrallsRequiredForAscension - sling.Thralls.Count);
         if (abiltiesAddedCount > 0)
         {
-            _popups.PopupPredicted(
+            _popups.PopupClient(
                 Loc.GetString("shadowling-collective-mind-success", ("thralls", thrallsRemaining)),
                 uid,
                 uid,
@@ -95,7 +90,7 @@ public sealed class ShadowlingCollectiveMindSystem : EntitySystem
         }
         else
         {
-            _popups.PopupPredicted(Loc.GetString("shadowling-collective-mind-failure", ("thralls", thrallsRemaining)),
+            _popups.PopupClient(Loc.GetString("shadowling-collective-mind-failure", ("thralls", thrallsRemaining)),
                 uid,
                 uid,
                 PopupType.Medium);

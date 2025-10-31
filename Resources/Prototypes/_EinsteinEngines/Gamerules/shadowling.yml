@@ -11,13 +11,18 @@
       max: 2
       playerRatio: 30
       chaosScore: 200
-      jobBlacklist: [ Chaplain ] # GOOBSTATION
+      jobBlacklist: [ Chaplain ]
       blacklist:
         components:
         - CommandStaff
       lateJoinAdditional: true
       mindRoles:
       - MindRoleShadowling
+      components:
+      - type: ShadowlingEnthrall
+        enthrallTime: 0
+        actionId: "ActionEnthrallPreHatch"
+        playSound: false
   - type: AntagObjectives
     objectives:
     - ShadowlingAscendObjective

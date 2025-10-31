@@ -19,6 +19,27 @@
   - type: ConfirmableAction
     popup: sling-hatch-engage-popup
 
+- type: entity
+  parent: BaseAction
+  id: ActionEnthrallPreHatch
+  name: Enthrall
+  description: Shatters their will, forging a thrall, does not work on mindshielded people or silicons. Instant use. Does not make a sound.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Action
+    itemIconStyle: NoItem
+    icon:
+      sprite: _EinsteinEngines/Shadowling/shadowling_abilities.rsi
+      state: enthrall
+  - type: LimitedCharges
+    maxCharges: 1
+  - type: TargetAction
+    range: 0.5
+    interactOnMiss: false
+  - type: EntityTargetAction
+    canTargetSelf: false
+    event: !type:EnthrallEvent { }
+
 # Post-Hatch
 - type: entity
   parent: BaseAction

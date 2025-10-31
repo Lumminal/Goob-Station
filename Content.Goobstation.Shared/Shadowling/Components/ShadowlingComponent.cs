@@ -77,7 +77,7 @@ public sealed partial class ShadowlingComponent : Component
     /// <summary>
     /// Thralls of the shadowling.
     /// </summary>
-    [DataField]
+    [DataField, AutoNetworkedField]
     public HashSet<EntityUid> Thralls = new();
 
     /// <summary>

@@ -22,15 +22,24 @@ public sealed class NightmareSystem : EntitySystem
     [Dependency] private readonly SharedActionsSystem _actionsSystem = default!;
     [Dependency] private readonly SharedStunSystem _stunSystem = default!;
 
+    private EntityQuery<PhaseShiftedComponent> _phaseShiftedQuery;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+
+        _phaseShiftedQuery = GetEntityQuery<PhaseShiftedComponent>();
+    }
+
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
 
         // Nightmares reflect shots while in the dark
         var nightmare = EntityQueryEnumerator<NightmareComponent, LightDetectionComponent, ReflectComponent>();
-        while (nightmare.MoveNext(out var uid, out var _, out var lightDet, out var reflect))
+        while (nightmare.MoveNext(out var uid, out var night, out var lightDet, out var reflect))
         {
-            if (lightDet.OnLight && HasComp<PhaseShiftedComponent>(uid))
+            if (lightDet.OnLight && _phaseShiftedQuery.HasComp(uid) && night.KnockdownOnJaunt)
             {
                 RemComp<PhaseShiftedComponent>(uid);
                 _stunSystem.TryKnockdown(uid, TimeSpan.FromSeconds(3), false);

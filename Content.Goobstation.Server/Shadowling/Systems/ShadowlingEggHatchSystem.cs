@@ -12,7 +12,6 @@ namespace Content.Goobstation.Server.Shadowling.Systems;
 /// <summary>
 /// This handles the hatching process
 /// </summary>
-///
 public sealed class ShadowlingEggHatchSystem : EntitySystem
 {
     [Dependency] private readonly PolymorphSystem _polymorph = default!;

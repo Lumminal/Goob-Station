@@ -41,6 +41,9 @@ public abstract class SharedShadowlingSystem : EntitySystem
         SubscribeLocalEvent<ShadowlingComponent, MobStateChangedEvent>(OnMobStateChanged);
         SubscribeLocalEvent<ShadowlingComponent, DamageModifyEvent>(OnDamageModify);
         SubscribeLocalEvent<ShadowlingComponent, ExaminedEvent>(OnExamined);
+
+        SubscribeLocalEvent<ShadowlingComponent, ThrallAddedEvent>(OnThrallAdded);
+        SubscribeLocalEvent<ShadowlingComponent, ThrallRemovedEvent>(OnThrallRemoved);
     }
 
     #region Event Handlers
@@ -75,7 +78,15 @@ public abstract class SharedShadowlingSystem : EntitySystem
         }
     }
 
-    public void OnThrallRemoved(Entity<ShadowlingComponent> ent)
+    private void OnThrallAdded(Entity<ShadowlingComponent> ent, ref ThrallAddedEvent args)
+    {
+        if (!TryComp<LightDetectionDamageComponent>(ent, out var lightDet))
+            return;
+
+        _lightDamage.AddResistance((ent.Owner, lightDet), ent.Comp.LightResistanceModifier);
+    }
+
+    private void OnThrallRemoved(Entity<ShadowlingComponent> ent, ref ThrallRemovedEvent args)
     {
         if (!TryComp<LightDetectionDamageComponent>(ent, out var lightDet))
             return;
@@ -174,7 +185,7 @@ public abstract class SharedShadowlingSystem : EntitySystem
             return false;
         }
 
-        if (!TryComp<MindControllableComponent>(target, out var mindControllable) || mindControllable.ControlledBySomeone)
+        /*if (!TryComp<MindControllableComponent>(target, out var mindControllable) || mindControllable.ControlledBySomeone)
         {
             _popup.PopupPredicted(Loc.GetString("shadowling-enthrall-cant-be-controlled"), uid, uid, PopupType.SmallCaution);
             return false;
@@ -184,7 +195,7 @@ public abstract class SharedShadowlingSystem : EntitySystem
         {
             _popup.PopupPredicted(Loc.GetString("shadowling-enthrall-no-mind"), uid, uid, PopupType.SmallCaution);
             return false;
-        }
+        }*/
 
         if (!HasComp<HumanoidAppearanceComponent>(target))
         {
@@ -193,12 +204,13 @@ public abstract class SharedShadowlingSystem : EntitySystem
         }
 
         // Target needs to be alive
-        if (!TryComp<MobStateComponent>(target, out var mobState)
-            || !_mobStateSystem.IsCritical(target, mobState) && !_mobStateSystem.IsCritical(target, mobState))
-            return true;
+        if (!TryComp<MobStateComponent>(target, out var mobState) || !_mobStateSystem.IsAlive(target, mobState))
+        {
+            _popup.PopupPredicted(Loc.GetString("shadowling-enthrall-dead"), uid, uid, PopupType.SmallCaution);
+            return false;
+        }
 
-        _popup.PopupPredicted(Loc.GetString("shadowling-enthrall-dead"), uid, uid, PopupType.SmallCaution);
-        return false;
+        return true;
     }
 
     public bool CanGlare(EntityUid target)
@@ -208,11 +220,12 @@ public abstract class SharedShadowlingSystem : EntitySystem
                && !HasComp<ThrallComponent>(target);
     }
 
-    public void DoEnthrall(EntityUid uid, EntProtoId components, SimpleDoAfterEvent args)
+    public void DoEnthrall(EntityUid uid, EntProtoId components, SimpleDoAfterEvent args, bool playSound)
     {
         if (args.Cancelled
             || args.Handled
-            || args.Target == null)
+            || args.Target == null
+            || !TryComp<ShadowlingComponent>(uid, out var sling))
             return;
 
         var target = args.Target.Value;
@@ -222,15 +235,27 @@ public abstract class SharedShadowlingSystem : EntitySystem
         var comps = _protoMan.Index(components);
         EntityManager.AddComponents(target, comps);
 
-        if (TryComp<ShadowlingComponent>(uid, out var sling))
-            sling.Thralls.Add(target);
+        sling.Thralls.Add(target);
+        Dirty(uid, sling);
 
-        _audio.PlayPredicted(
-            new SoundPathSpecifier("/Audio/Items/Defib/defib_zap.ogg"),
-            target,
-            uid,
-            AudioParams.Default);
+        if (playSound)
+        {
+            _audio.PlayPredicted(
+                new SoundPathSpecifier("/Audio/Items/Defib/defib_zap.ogg"),
+                target,
+                uid,
+                AudioParams.Default);
+        }
+
+        var ev = new ThrallAddedEvent();
+        RaiseLocalEvent(uid, ref ev);
 
         args.Handled = true;
     }
 }
+
+[ByRefEvent]
+public record struct ThrallRemovedEvent;
+
+[ByRefEvent]
+public record struct ThrallAddedEvent;

@@ -23,4 +23,7 @@ public sealed partial class ShadowlingEmpoweredEnthrallComponent : Component
 
     [DataField]
     public EntityUid? ActionEnt;
+
+    [DataField]
+    public bool PlaySound = true;
 }

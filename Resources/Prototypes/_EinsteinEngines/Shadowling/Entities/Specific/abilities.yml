@@ -15,9 +15,11 @@
     availableAbilities:
     - SonicScreech
     - NullCharge
+    - NightmareArmblade
     - BlackRecuperation
-    - BlindnessSmoke
     - EmpoweredEnthrall
+    - BlindnessSmoke
+    - NightmareReflect
     - NoxImperii
     - Ascendance
   - type: LightDetection

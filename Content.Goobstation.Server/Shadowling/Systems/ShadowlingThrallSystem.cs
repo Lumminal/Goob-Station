@@ -2,6 +2,7 @@ using Content.Goobstation.Shared.Devil;
 using Content.Goobstation.Shared.Overlays;
 using Content.Goobstation.Shared.Shadowling.Components;
 using Content.Goobstation.Shared.Shadowling.Components.Abilities.Thrall;
+using Content.Goobstation.Shared.Shadowling.Systems;
 using Content.Server.Antag;
 using Content.Server.Mind;
 using Content.Server.Roles;
@@ -18,17 +19,17 @@ public sealed class ShadowlingThrallSystem : EntitySystem
     [Dependency] private readonly AntagSelectionSystem _antag = default!;
     [Dependency] private readonly MindSystem _mind = default!;
     [Dependency] private readonly RoleSystem _roles = default!;
-    [Dependency] private readonly ShadowlingSystem _shadowling = default!;
+
     public override void Initialize()
     {
         base.Initialize();
 
-        SubscribeLocalEvent<ThrallComponent, ComponentStartup>(OnStartup);
+        SubscribeLocalEvent<ThrallComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<ThrallComponent, ComponentShutdown>(OnRemove);
         SubscribeLocalEvent<ThrallComponent, ExaminedEvent>(OnExamined);
     }
 
-    private void OnStartup(EntityUid uid, ThrallComponent component, ComponentStartup args)
+    private void OnMapInit(EntityUid uid, ThrallComponent component, MapInitEvent args)
     {
         // antag stuff
         if (!_mind.TryGetMind(uid, out var mindId, out _))
@@ -52,10 +53,10 @@ public sealed class ShadowlingThrallSystem : EntitySystem
         if (component.Converter == null)
             return;
 
-        // Adjust lightning resistance for shadowling
         var shadowling = component.Converter.Value;
-        if (TryComp<ShadowlingComponent>(shadowling, out var shadowlingComp))
-            _shadowling.OnThrallRemoved((shadowling, shadowlingComp));
+
+        var ev = new ThrallRemovedEvent();
+        RaiseLocalEvent(shadowling, ref ev);
     }
 
     private void OnExamined(EntityUid uid, ThrallComponent component, ExaminedEvent args)
